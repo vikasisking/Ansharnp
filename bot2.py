@@ -424,7 +424,6 @@ def send_random_number(chat_id, country=None, edit=False):
 
 active_users = set()
 REQUIRED_CHANNELS = ["@+zGBLO8pOSylmODMx", "@freeotpss"]  # Only this one is required  # This one is optional, just button show karega
-
 @bot.message_handler(commands=["start"])
 def start(message):
     chat_id = message.chat.id
@@ -434,20 +433,29 @@ def start(message):
         return
 
     active_users.add(chat_id)
-
     not_joined = []
+
     for channel in REQUIRED_CHANNELS:
         try:
-            member = bot.get_chat_member(channel, chat_id)
+            # Handle invite links or usernames
+            if channel.startswith("http"):
+                chat_info = bot.get_chat(channel)
+                channel_id = chat_info.id
+            else:
+                channel_id = channel
+
+            member = bot.get_chat_member(channel_id, chat_id)
             if member.status not in ["member", "creator", "administrator"]:
                 not_joined.append(channel)
-        except:
+        except Exception as e:
+            print(f"Join check failed for {channel}: {e}")
             not_joined.append(channel)
 
     if not_joined:
         markup = types.InlineKeyboardMarkup()
         for ch in not_joined:
-            markup.add(types.InlineKeyboardButton(f"🚀 Join {ch}", url=f"https://t.me/{ch[1:]}"))
+            link = ch if ch.startswith("http") else f"https://t.me/{ch.lstrip('@')}"
+            markup.add(types.InlineKeyboardButton(f"🚀 Join {ch}", url=link))
         bot.send_message(chat_id, "❌ You must join all required channels to use the bot.", reply_markup=markup)
         return
 
@@ -461,8 +469,10 @@ def start(message):
         flag = country_to_flag(country)
         btn_text = f"{flag} {country} ({count} numbers)"
         markup.add(types.InlineKeyboardButton(btn_text, callback_data=f"user_select_{country}"))
+
     msg = bot.send_message(chat_id, "🌍 Choose a country:", reply_markup=markup)
     user_messages[chat_id] = msg
+
 @bot.message_handler(commands=["broadcast"])
 def broadcast_start(message):
     if message.from_user.id != ADMIN_ID:
