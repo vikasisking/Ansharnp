@@ -446,7 +446,7 @@ def start(message):
     if not_joined:
         markup = types.InlineKeyboardMarkup()
         for ch in not_joined:
-            markup.add(types.InlineKeyboardButton(f"🚀 Join {ch}", url=f"https://t.me/{ch[1:]}"))
+            markup.add(types.InlineKeyboardButton(f"🚀 Join Channel", url=f"https://t.me/{ch[1:]}"))
         bot.send_message(chat_id, "❌ You must join all required channels to use the bot.", reply_markup=markup)
         return
 
