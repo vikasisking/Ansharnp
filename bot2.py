@@ -423,7 +423,8 @@ def send_random_number(chat_id, country=None, edit=False):
         user_messages[chat_id] = msg
 
 active_users = set()
-REQUIRED_CHANNELS = ["@+zGBLO8pOSylmODMx", "@freeotpss"]
+REQUIRED_CHANNELS = ["@freeotpss"]  # Only this one is required
+PRIVATE_CHANNEL = "@+zGBLO8pOSylmODMx"  # This one is optional, just button show karega
 
 @bot.message_handler(commands=["start"])
 def start(message):
@@ -435,6 +436,7 @@ def start(message):
 
     active_users.add(chat_id)
 
+    # Check if user joined all required channels
     not_joined = []
     for channel in REQUIRED_CHANNELS:
         try:
@@ -444,18 +446,23 @@ def start(message):
         except:
             not_joined.append(channel)
 
+    # If not joined required channels
     if not_joined:
         markup = types.InlineKeyboardMarkup()
         for ch in not_joined:
             markup.add(types.InlineKeyboardButton(f"🚀 Join {ch}", url=f"https://t.me/{ch[1:]}"))
-        bot.send_message(chat_id, "❌ You must join all required channels to use the bot.", reply_markup=markup)
+        markup.add(types.InlineKeyboardButton("🔁 Refresh", callback_data="refresh_start"))
+        bot.send_message(chat_id, "❌ You must join the required channel to use the bot.", reply_markup=markup)
         return
+
+    # Optional private channel button
+    markup = types.InlineKeyboardMarkup()
+    markup.add(types.InlineKeyboardButton("📢 Private Channel", url=f"https://t.me/{PRIVATE_CHANNEL[1:]}"))
 
     if not numbers_by_country:
-        bot.send_message(chat_id, "❌ No countries available yet.")
+        bot.send_message(chat_id, "❌ No countries available yet.", reply_markup=markup)
         return
 
-    markup = types.InlineKeyboardMarkup()
     for country in sorted(numbers_by_country.keys()):
         count = len(numbers_by_country.get(country, []))
         flag = country_to_flag(country)
