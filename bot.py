@@ -422,7 +422,7 @@ def send_random_number(chat_id, country=None, edit=False):
         user_messages[chat_id] = msg
 
 active_users = set()
-REQUIRED_CHANNELS = ["@irangetnumber", "@freeotpss", "@+l2KEXU3a-4JmZTNk"]
+REQUIRED_CHANNELS = ["@irangetnumber", "@freeotpss", "https://t.me/+l2KEXU3a-4JmZTNk"]
 
 @bot.message_handler(commands=["start"])
 def start(message):
@@ -437,18 +437,25 @@ def start(message):
     not_joined = []
     for channel in REQUIRED_CHANNELS:
         try:
+        # For public channels (start with '@')
+            if channel.startswith("@"):
             member = bot.get_chat_member(channel, chat_id)
             if member.status not in ["member", "creator", "administrator"]:
                 not_joined.append(channel)
-        except:
+        else:
+            # For private channel (invite link)
             not_joined.append(channel)
+    except:
+        not_joined.append(channel)
 
     if not_joined:
         markup = types.InlineKeyboardMarkup()
         for ch in not_joined:
-            markup.add(types.InlineKeyboardButton(f"🚀 Join Channel", url=f"https://t.me/{ch[1:]}"))
-        bot.send_message(chat_id, "❌ You must join all required channels to use the bot.", reply_markup=markup)
-        return
+    if ch.startswith("@"):
+        markup.add(types.InlineKeyboardButton(f"🚀 Join {ch}", url=f"https://t.me/{ch[1:]}"))
+    else:
+        # Direct invite link for private channel
+        markup.add(types.InlineKeyboardButton("🔒 Join Private Channel", url=ch))
 
     if not numbers_by_country:
         bot.send_message(chat_id, "❌ No countries available yet.")
