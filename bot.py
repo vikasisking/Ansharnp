@@ -422,7 +422,12 @@ def send_random_number(chat_id, country=None, edit=False):
         user_messages[chat_id] = msg
 
 active_users = set()
-REQUIRED_CHANNELS = ["@irangetnumber", "@freeotpss", "https://t.me/+l2KEXU3a-4JmZTNk"]
+# ---------------- FORCE JOIN SYSTEM ----------------
+REQUIRED_CHANNELS = [
+    "@irangetnumber",                   # Public Channel 1
+    "@freeotpss",                  # Public Channel 2
+    "https://t.me/+l2KEXU3a-4JmZTNk"  # Private Channel (replace with your link)
+]
 
 @bot.message_handler(commands=["start"])
 def start(message):
@@ -437,25 +442,27 @@ def start(message):
     not_joined = []
     for channel in REQUIRED_CHANNELS:
         try:
-        # For public channels (start with '@')
+            # For public channels
             if channel.startswith("@"):
-            member = bot.get_chat_member(channel, chat_id)
-            if member.status not in ["member", "creator", "administrator"]:
+                member = bot.get_chat_member(channel, chat_id)
+                if member.status not in ["member", "creator", "administrator"]:
+                    not_joined.append(channel)
+            else:
+                # For private channel (invite link)
                 not_joined.append(channel)
-        else:
-            # For private channel (invite link)
+        except:
             not_joined.append(channel)
-    except:
-        not_joined.append(channel)
 
     if not_joined:
         markup = types.InlineKeyboardMarkup()
         for ch in not_joined:
-    if ch.startswith("@"):
-        markup.add(types.InlineKeyboardButton(f"🚀 Join {ch}", url=f"https://t.me/{ch[1:]}"))
-    else:
-        # Direct invite link for private channel
-        markup.add(types.InlineKeyboardButton("🔒 Join Private Channel", url=ch))
+            if ch.startswith("@"):
+                markup.add(types.InlineKeyboardButton(f"🚀 Join Channel", url=f"https://t.me/{ch[1:]}"))
+            else:
+                markup.add(types.InlineKeyboardButton("🔒 Join Private Channel", url=ch))
+        markup.add(types.InlineKeyboardButton("✅ I Joined All", callback_data="verify_join"))
+        bot.send_message(chat_id, "⚠️ You must join all required channels to use this bot.", reply_markup=markup)
+        return
 
     if not numbers_by_country:
         bot.send_message(chat_id, "❌ No countries available yet.")
@@ -466,6 +473,35 @@ def start(message):
         markup.add(types.InlineKeyboardButton(country, callback_data=f"user_select_{country}"))
     msg = bot.send_message(chat_id, "🌍 Choose a country:", reply_markup=markup)
     user_messages[chat_id] = msg
+
+@bot.callback_query_handler(func=lambda call: call.data == "verify_join")
+def verify_join(call):
+    chat_id = call.message.chat.id
+    not_joined = []
+    for channel in REQUIRED_CHANNELS:
+        try:
+            if channel.startswith("@"):
+                member = bot.get_chat_member(channel, chat_id)
+                if member.status not in ["member", "creator", "administrator"]:
+                    not_joined.append(channel)
+        except:
+            not_joined.append(channel)
+
+    if not_joined:
+        markup = types.InlineKeyboardMarkup()
+        for ch in not_joined:
+            if ch.startswith("@"):
+                markup.add(types.InlineKeyboardButton(f"🚀 Join {ch}", url=f"https://t.me/{ch[1:]}"))
+            else:
+                markup.add(types.InlineKeyboardButton("🔒 Join Private Channel", url=ch))
+        markup.add(types.InlineKeyboardButton("✅ I Joined All", callback_data="verify_join"))
+        bot.edit_message_text("❌ You still haven’t joined all required channels. Join them and click *I Joined All* again.", chat_id, call.message.message_id, reply_markup=markup, parse_mode="Markdown")
+    else:
+        markup = types.InlineKeyboardMarkup()
+        for country in sorted(numbers_by_country.keys()):
+            markup.add(types.InlineKeyboardButton(country, callback_data=f"user_select_{country}"))
+        bot.edit_message_text("🌍 Choose a country:", chat_id, call.message.message_id, reply_markup=markup)
+
 
 @bot.message_handler(commands=["broadcast"])
 def broadcast_start(message):
