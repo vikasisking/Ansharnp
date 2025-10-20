@@ -410,11 +410,12 @@ def send_random_number(chat_id, country=None, edit=False):
     user_current_country[chat_id] = country
     user_numbers[number] = chat_id
 
-    text = f"📞 Number for *{country}*:\n`{number}`\n\n⏳ Waiting for OTPs..."
+    text = f"📞 Number for *{country}\*:\n`{number}`\n\n⏳ Waiting for OTPs..."
     markup = types.InlineKeyboardMarkup()
     markup.add(types.InlineKeyboardButton("🔄 Change Number", callback_data="change_number"))
     markup.add(types.InlineKeyboardButton("🌍 Change Country", callback_data="change_country"))
-    markup.add(types.InlineKeyboardButton("🔗 Code GROUP", url="https://t.me/irangetotp"))
+    markup.add(types.InlineKeyboardButton("🔗 Code GROUP", url="https://t.me/+FhMz9dj1RqIxOTc1"))
+
     if chat_id in user_messages:
         bot.edit_message_text(text, chat_id, user_messages[chat_id].message_id, reply_markup=markup, parse_mode="Markdown")
     else:
@@ -422,32 +423,23 @@ def send_random_number(chat_id, country=None, edit=False):
         user_messages[chat_id] = msg
 
 active_users = set()
-# ---------------- FORCE JOIN SYSTEM ----------------
-REQUIRED_CHANNELS = [
-    "@irangetnumber",                   # Public Channel 1
-    "@freeotpss",                  # Public Channel 2
-    "https://t.me/+l2KEXU3a-4JmZTNk"  # Private Channel (replace with your link)
-]
-# ---------------- START COMMAND ----------------
+REQUIRED_CHANNELS = ["@irangetnumber", "@freeotpss"]
+
 @bot.message_handler(commands=["start"])
 def start(message):
     chat_id = message.chat.id
 
+    if message.from_user.id == ADMIN_ID:
+        bot.send_message(chat_id, "👋 Welcome Admin!\nUse /adminhelp for commands.")
+        return
+
     active_users.add(chat_id)
 
-    # ⚙️ Clear old state
-    if chat_id in user_messages:
-        del user_messages[chat_id]
-
-    # Force join check (if needed)
     not_joined = []
     for channel in REQUIRED_CHANNELS:
         try:
-            if channel.startswith("@"):
-                member = bot.get_chat_member(channel, chat_id)
-                if member.status not in ["member", "creator", "administrator"]:
-                    not_joined.append(channel)
-            else:
+            member = bot.get_chat_member(channel, chat_id)
+            if member.status not in ["member", "creator", "administrator"]:
                 not_joined.append(channel)
         except:
             not_joined.append(channel)
@@ -455,81 +447,28 @@ def start(message):
     if not_joined:
         markup = types.InlineKeyboardMarkup()
         for ch in not_joined:
-            if ch.startswith("@"):
-                markup.add(types.InlineKeyboardButton(f"🚀 Join {ch}", url=f"https://t.me/{ch[1:]}"))
-            else:
-                markup.add(types.InlineKeyboardButton("🔒 Join Private Channel", url=ch))
-        markup.add(types.InlineKeyboardButton("✅ I Joined All", callback_data="verify_join"))
-        bot.send_message(chat_id, "⚠️ Please join all required channels to use this bot.", reply_markup=markup)
+            markup.add(types.InlineKeyboardButton(f"🚀 Join {ch}", url=f"https://t.me/{ch[1:]}"))
+        bot.send_message(chat_id, "❌ You must join all required channels to use the bot.", reply_markup=markup)
         return
 
-    # ✅ Always send a new message (fresh start)
+    if not numbers_by_country:
+        bot.send_message(chat_id, "❌ No countries available yet.")
+        return
+
     markup = types.InlineKeyboardMarkup()
     for country in sorted(numbers_by_country.keys()):
-        markup.add(types.InlineKeyboardButton(country, callback_data=f"user_select_{country}"))
-
+        count = len(numbers_by_country.get(country, []))
+        flag = country_to_flag(country)
+        btn_text = f"{flag} {country} ({count} numbers)"
+        markup.add(types.InlineKeyboardButton(btn_text, callback_data=f"user_select_{country}"))
     msg = bot.send_message(chat_id, "🌍 Choose a country:", reply_markup=markup)
-    user_messages[chat_id] = msg  # store latest message reference
-
-
-# ---------------- COUNTRY SELECT ----------------
-@bot.callback_query_handler(func=lambda call: call.data.startswith("user_select_"))
-def user_select_country(call):
-    chat_id = call.message.chat.id
-    country = call.data.split("_", 2)[2]
-
-    if country not in numbers_by_country or not numbers_by_country[country]:
-        bot.answer_callback_query(call.id, "❌ No numbers available for this country.", show_alert=True)
-        return
-
-    numbers = numbers_by_country[country]
-    markup = types.InlineKeyboardMarkup()
-    for number in numbers[:10]:
-        markup.add(types.InlineKeyboardButton(number, callback_data=f"get_number_{country}_{number}"))
-
-    markup.add(types.InlineKeyboardButton("🔁 Refresh", callback_data=f"user_select_{country}"))
-    markup.add(types.InlineKeyboardButton("🌍 Back to Country List", callback_data="show_country_list"))
-
-    # ✅ Edit message only if exists, else send new
-    if chat_id in user_messages:
-        try:
-            bot.edit_message_text(
-                text=f"📱 Available numbers for *{country}*:",
-                chat_id=chat_id,
-                message_id=user_messages[chat_id].message_id,
-                reply_markup=markup,
-                parse_mode="Markdown"
-            )
-        except:
-            # if old message deleted or invalid, send a new one
-            msg = bot.send_message(chat_id, f"📱 Available numbers for *{country}*:", reply_markup=markup, parse_mode="Markdown")
-            user_messages[chat_id] = msg
-    else:
-        msg = bot.send_message(chat_id, f"📱 Available numbers for *{country}*:", reply_markup=markup, parse_mode="Markdown")
-        user_messages[chat_id] = msg
-
-
-# ---------------- BACK TO COUNTRY LIST ----------------
-@bot.callback_query_handler(func=lambda call: call.data == "show_country_list")
-def show_country_list(call):
-    chat_id = call.message.chat.id
-
-    markup = types.InlineKeyboardMarkup()
-    for country in sorted(numbers_by_country.keys()):
-        markup.add(types.InlineKeyboardButton(country, callback_data=f"user_select_{country}"))
-
-    bot.edit_message_text(
-        text="🌍 Choose a country:",
-        chat_id=chat_id,
-        message_id=call.message.message_id,
-        reply_markup=markup
-    )
+    user_messages[chat_id] = msg
 
 @bot.message_handler(commands=["broadcast"])
 def broadcast_start(message):
     if message.from_user.id != ADMIN_ID:
         return bot.reply_to(message, "❌ You are not the admin.")
-    
+
     msg = bot.reply_to(message, "✉️ Send the message you want to broadcast to all users:")
     bot.register_next_step_handler(msg, broadcast_message)
 
