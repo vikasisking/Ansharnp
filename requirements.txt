@@ -1,0 +1,7 @@
+pyTelegramBotAPI
+Flask
+requests
+beautifulsoup
+phonenumber
+pycountry
+pymongo
