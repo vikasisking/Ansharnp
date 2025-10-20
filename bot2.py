@@ -443,8 +443,10 @@ def start(message):
             member = bot.get_chat_member(channel, chat_id)
             if member.status not in ["member", "creator", "administrator"]:
                 not_joined.append(channel)
-        except:
-            not_joined.append(channel)
+        except Exception as e:
+            logger.warning(f"Skipping join check for {channel}: {e}")
+        # Don't force user if bot can't access private channel
+            continue
 
     # If not joined required channels
     if not_joined:
