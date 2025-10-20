@@ -423,8 +423,7 @@ def send_random_number(chat_id, country=None, edit=False):
         user_messages[chat_id] = msg
 
 active_users = set()
-REQUIRED_CHANNELS = ["@freeotpss"]  # Only this one is required
-PRIVATE_CHANNEL = "@+zGBLO8pOSylmODMx"  # This one is optional, just button show karega
+REQUIRED_CHANNELS = ["+zGBLO8pOSylmODMx", "@freeotpss"]  # Only this one is required  # This one is optional, just button show karega
 
 @bot.message_handler(commands=["start"])
 def start(message):
@@ -436,35 +435,27 @@ def start(message):
 
     active_users.add(chat_id)
 
-    # Check if user joined all required channels
     not_joined = []
     for channel in REQUIRED_CHANNELS:
         try:
             member = bot.get_chat_member(channel, chat_id)
             if member.status not in ["member", "creator", "administrator"]:
                 not_joined.append(channel)
-        except Exception as e:
-            logger.warning(f"Skipping join check for {channel}: {e}")
-        # Don't force user if bot can't access private channel
-            continue
+        except:
+            not_joined.append(channel)
 
-    # If not joined required channels
     if not_joined:
         markup = types.InlineKeyboardMarkup()
         for ch in not_joined:
             markup.add(types.InlineKeyboardButton(f"🚀 Join {ch}", url=f"https://t.me/{ch[1:]}"))
-        markup.add(types.InlineKeyboardButton("🔁 Refresh", callback_data="refresh_start"))
-        bot.send_message(chat_id, "❌ You must join the required channel to use the bot.", reply_markup=markup)
+        bot.send_message(chat_id, "❌ You must join all required channels to use the bot.", reply_markup=markup)
         return
-
-    # Optional private channel button
-    markup = types.InlineKeyboardMarkup()
-    markup.add(types.InlineKeyboardButton("📢 Private Channel", url=f"https://t.me/{PRIVATE_CHANNEL[1:]}"))
 
     if not numbers_by_country:
-        bot.send_message(chat_id, "❌ No countries available yet.", reply_markup=markup)
+        bot.send_message(chat_id, "❌ No countries available yet.")
         return
 
+    markup = types.InlineKeyboardMarkup()
     for country in sorted(numbers_by_country.keys()):
         count = len(numbers_by_country.get(country, []))
         flag = country_to_flag(country)
@@ -472,7 +463,6 @@ def start(message):
         markup.add(types.InlineKeyboardButton(btn_text, callback_data=f"user_select_{country}"))
     msg = bot.send_message(chat_id, "🌍 Choose a country:", reply_markup=markup)
     user_messages[chat_id] = msg
-
 @bot.message_handler(commands=["broadcast"])
 def broadcast_start(message):
     if message.from_user.id != ADMIN_ID:
