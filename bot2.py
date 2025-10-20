@@ -423,46 +423,50 @@ def send_random_number(chat_id, country=None, edit=False):
         user_messages[chat_id] = msg
 
 active_users = set()
-REQUIRED_CHANNELS = ["@+zGBLO8pOSylmODMx", "@freeotpss"]  # Only this one is required  # This one is optional, just button show karega
 @bot.message_handler(commands=["start"])
 def start(message):
     chat_id = message.chat.id
 
+    # ---- Admin Section ----
     if message.from_user.id == ADMIN_ID:
         bot.send_message(chat_id, "👋 Welcome Admin!\nUse /adminhelp for commands.")
         return
 
     active_users.add(chat_id)
-    not_joined = []
 
+    # ---- Required Channels ----
+    # Use channel ID for private one, and username for public
+    REQUIRED_CHANNELS = [
+        "-1002635378817",  # ← Replace this with your private channel's chat ID
+        "@freeotpss"
+    ]
+
+    # ---- Check Membership ----
+    not_joined = []
     for channel in REQUIRED_CHANNELS:
         try:
-            # Handle invite links or usernames
-            if channel.startswith("http"):
-                chat_info = bot.get_chat(channel)
-                channel_id = chat_info.id
-            else:
-                channel_id = channel
-
-            member = bot.get_chat_member(channel_id, chat_id)
+            member = bot.get_chat_member(channel, chat_id)
             if member.status not in ["member", "creator", "administrator"]:
                 not_joined.append(channel)
         except Exception as e:
-            print(f"Join check failed for {channel}: {e}")
+            print(f"[JOIN CHECK FAILED] {channel} → {e}")
             not_joined.append(channel)
 
+    # ---- If Not Joined ----
     if not_joined:
         markup = types.InlineKeyboardMarkup()
-        for ch in not_joined:
-            link = ch if ch.startswith("http") else f"https://t.me/{ch.lstrip('@')}"
-            markup.add(types.InlineKeyboardButton(f"🚀 Join {ch}", url=link))
+        # Always show both join buttons
+        markup.add(types.InlineKeyboardButton("🚀 Join Channel 1", url="https://t.me/+zGBLO8pOSylmODMx"))
+        markup.add(types.InlineKeyboardButton("🚀 Join Channel 2", url="https://t.me/freeotpss"))
         bot.send_message(chat_id, "❌ You must join all required channels to use the bot.", reply_markup=markup)
         return
 
+    # ---- If No Countries Available ----
     if not numbers_by_country:
         bot.send_message(chat_id, "❌ No countries available yet.")
         return
 
+    # ---- Show Available Countries ----
     markup = types.InlineKeyboardMarkup()
     for country in sorted(numbers_by_country.keys()):
         count = len(numbers_by_country.get(country, []))
