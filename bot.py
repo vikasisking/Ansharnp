@@ -502,6 +502,52 @@ def verify_join(call):
             markup.add(types.InlineKeyboardButton(country, callback_data=f"user_select_{country}"))
         bot.edit_message_text("🌍 Choose a country:", chat_id, call.message.message_id, reply_markup=markup)
 
+# ---------------- COUNTRY SELECTION ----------------
+@bot.callback_query_handler(func=lambda call: call.data.startswith("user_select_"))
+def user_select_country(call):
+    chat_id = call.message.chat.id
+    country = call.data.split("_", 2)[2]
+
+    # Check if selected country exists
+    if country not in numbers_by_country or not numbers_by_country[country]:
+        bot.answer_callback_query(call.id, "❌ No numbers found for this country.", show_alert=True)
+        return
+
+    # Prepare number list for the country
+    numbers = numbers_by_country[country]
+    markup = types.InlineKeyboardMarkup()
+
+    for number in numbers[:10]:  # Show top 10 numbers
+        markup.add(types.InlineKeyboardButton(number, callback_data=f"get_number_{country}_{number}"))
+
+    markup.add(types.InlineKeyboardButton("🔁 Refresh", callback_data=f"user_select_{country}"))
+    markup.add(types.InlineKeyboardButton("🌍 Back to Countries", callback_data="show_country_list"))
+
+    # 🔹 Edit the same message instead of sending a new one
+    bot.edit_message_text(
+        text=f"📱 Available numbers for *{country}*:",
+        chat_id=chat_id,
+        message_id=call.message.message_id,
+        reply_markup=markup,
+        parse_mode="Markdown"
+    )
+
+
+# ---------------- BACK TO COUNTRY LIST ----------------
+@bot.callback_query_handler(func=lambda call: call.data == "show_country_list")
+def show_country_list(call):
+    chat_id = call.message.chat.id
+
+    markup = types.InlineKeyboardMarkup()
+    for country in sorted(numbers_by_country.keys()):
+        markup.add(types.InlineKeyboardButton(country, callback_data=f"user_select_{country}"))
+
+    bot.edit_message_text(
+        text="🌍 Choose a country:",
+        chat_id=chat_id,
+        message_id=call.message.message_id,
+        reply_markup=markup
+    )
 
 @bot.message_handler(commands=["broadcast"])
 def broadcast_start(message):
