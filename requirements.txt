@@ -1,7 +1,7 @@
 pyTelegramBotAPI
 Flask
 requests
-beautifulsoup
-phonenumber
+beautifulsoup4
+phonenumbers
 pycountry
 pymongo
