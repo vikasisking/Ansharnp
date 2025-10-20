@@ -1,4 +1,3 @@
-
 import telebot
 from telebot import types
 import json
@@ -39,7 +38,6 @@ USERNAME = os.getenv("USERNAME", "khan80444")
 PASSWORD = os.getenv("PASSWORD", "khan80444")
 OTP_GROUP_IDS = ["-1002535296650"]  # Updated with multiple group IDs
 CHANNEL_LINK = "https://t.me/irangetnumber"
-BACKUP = "https://t.me/DDXOTP"
 DEVELOPER_ID = "@Ansar_Sms_Bot"
 
 # Headers for New Panel
@@ -298,7 +296,7 @@ def format_message(record, personal=False):
         f"<blockquote>📞 <b>Number:</b> <b>{html.escape(mask_number(number))}</b></blockquote>\n"
         f"<blockquote>{otp_line}</blockquote>"
         f"<blockquote>✉️ <b>Full Message:</b></blockquote>\n"
-        f"<blockquote><code>{html.escape(message)}</code></blockquote>\n\"
+        f"<blockquote><code>{html.escape(message)}</code></blockquote>\n"
     )
     else:
         formatted = (
@@ -424,7 +422,7 @@ def send_random_number(chat_id, country=None, edit=False):
         user_messages[chat_id] = msg
 
 active_users = set()
-REQUIRED_CHANNELS = ["@ddxotp", "@vasuhub"]
+REQUIRED_CHANNELS = ["@irangetnumber", "@freeotpss", "@+l2KEXU3a-4JmZTNk"]
 
 @bot.message_handler(commands=["start"])
 def start(message):
