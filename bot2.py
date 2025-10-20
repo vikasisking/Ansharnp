@@ -38,7 +38,7 @@ USERNAME = os.getenv("USERNAME", "ali12555")
 PASSWORD = os.getenv("PASSWORD", "ali12555")
 OTP_GROUP_IDS = ["-1002993082859"]  # Updated with multiple group IDs
 CHANNEL_LINK = "https://t.me/+zGBLO8pOSylmODMx"
-DEVELOPER_ID = "@Ansar_Sms_Bot"
+DEVELOPER_ID = "@xionotpsbot"
 
 # Headers for New Panel
 HEADERS = {
