@@ -23,8 +23,8 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # ---------------- CONFIG ----------------
-BOT_TOKEN = "7893375774:AAFRC8qtqNKvhYtr5LCkdw85ZKd7kQQCAjs"
-ADMIN_ID = 7819854683
+BOT_TOKEN = "8438490405:AAEf7Go-io_RUzgDCfHTEuSw7iEJf_SSO2E"
+ADMIN_ID = 7139335625
 bot = telebot.TeleBot(BOT_TOKEN)
 
 DATA_FILE = "bot_data.json"
@@ -34,10 +34,10 @@ os.makedirs(NUMBERS_DIR, exist_ok=True)
 # New Panel OTP API Config
 LOGIN_URL = "http://51.89.99.105/NumberPanel/signin"
 XHR_URL = "http://51.89.99.105/NumberPanel/agent/res/data_smscdr.php?fdate1=2025-09-05%2000:00:00&fdate2=2026-09-04%2023:59:59&frange=&fclient=&fnum=&fcli=&fgdate=&fgmonth=&fgrange=&fgclient=&fgnumber=&fgcli=&fg=0&sEcho=1&iColumns=9&sColumns=%2C%2C%2C%2C%2C%2C%2C%2C&iDisplayStart=0&iDisplayLength=25&mDataProp_0=0&sSearch_0=&bRegex_0=false&bSearchable_0=true&bSortable_0=true&mDataProp_1=1&sSearch_1=&bRegex_1=false&bSearchable_1=true&bSortable_1=true&mDataProp_2=2&sSearch_2=&bRegex_2=false&bSearchable_2=true&bSortable_2=true&mDataProp_3=3&sSearch_3=&bRegex_3=false&bSearchable_3=true&bSortable_3=true&mDataProp_4=4&sSearch_4=&bRegex_4=false&bSearchable_4=true&bSortable_4=true&mDataProp_5=5&sSearch_5=&bRegex_5=false&bSearchable_5=true&bSortable_5=true&mDataProp_6=6&sSearch_6=&bRegex_6=false&bSearchable_6=true&bSortable_6=true&mDataProp_7=7&sSearch_7=&bRegex_7=false&bSearchable_7=true&bSortable_7=true&mDataProp_8=8&sSearch_8=&bRegex_8=false&bSearchable_8=true&bSortable_8=false&sSearch=&bRegex=false&iSortCol_0=0&sSortDir_0=desc&iSortingCols=1&_=1756968295291"
-USERNAME = os.getenv("USERNAME", "khan80444")
-PASSWORD = os.getenv("PASSWORD", "khan80444")
-OTP_GROUP_IDS = ["-1002535296650"]  # Updated with multiple group IDs
-CHANNEL_LINK = "https://t.me/irangetnumber"
+USERNAME = os.getenv("USERNAME", "ali12555")
+PASSWORD = os.getenv("PASSWORD", "ali12555")
+OTP_GROUP_IDS = [""]  # Updated with multiple group IDs
+CHANNEL_LINK = "https://t.me/+zGBLO8pOSylmODMx"
 DEVELOPER_ID = "@Ansar_Sms_Bot"
 
 # Headers for New Panel
@@ -414,7 +414,7 @@ def send_random_number(chat_id, country=None, edit=False):
     markup = types.InlineKeyboardMarkup()
     markup.add(types.InlineKeyboardButton("🔄 Change Number", callback_data="change_number"))
     markup.add(types.InlineKeyboardButton("🌍 Change Country", callback_data="change_country"))
-    markup.add(types.InlineKeyboardButton("🔗 Code GROUP", url="https://t.me/+FhMz9dj1RqIxOTc1"))
+    markup.add(types.InlineKeyboardButton("🔗 Code GROUP", url="http://t.me/xion_otps"))
 
     if chat_id in user_messages:
         bot.edit_message_text(text, chat_id, user_messages[chat_id].message_id, reply_markup=markup, parse_mode="Markdown")
@@ -423,7 +423,7 @@ def send_random_number(chat_id, country=None, edit=False):
         user_messages[chat_id] = msg
 
 active_users = set()
-REQUIRED_CHANNELS = ["@irangetnumber", "@freeotpss"]
+REQUIRED_CHANNELS = ["@+zGBLO8pOSylmODMx", "@freeotpss"]
 
 @bot.message_handler(commands=["start"])
 def start(message):
