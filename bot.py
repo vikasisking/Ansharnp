@@ -410,7 +410,7 @@ def send_random_number(chat_id, country=None, edit=False):
     user_current_country[chat_id] = country
     user_numbers[number] = chat_id
 
-    text = f"📞 Number for *{country}\*:\n`{number}`\n\n⏳ Waiting for OTPs..."
+    text = f"📞 Number for *{country}*:\n`{number}`\n\n⏳ Waiting for OTPs..."
     markup = types.InlineKeyboardMarkup()
     markup.add(types.InlineKeyboardButton("🔄 Change Number", callback_data="change_number"))
     markup.add(types.InlineKeyboardButton("🌍 Change Country", callback_data="change_country"))
