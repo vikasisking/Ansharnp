@@ -437,7 +437,7 @@ def start(message):
     # Use channel ID for private one, and username for public
     REQUIRED_CHANNELS = [
         "-1003035195680",  # ← Replace this with your private channel's chat ID
-        ""
+        "-1003147926675"
     ]
 
     # ---- Check Membership ----
