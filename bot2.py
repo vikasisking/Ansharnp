@@ -27,8 +27,8 @@ BOT_TOKEN = "8438490405:AAEf7Go-io_RUzgDCfHTEuSw7iEJf_SSO2E"
 ADMIN_ID = 7139335625
 bot = telebot.TeleBot(BOT_TOKEN)
 
-DATA_FILE = "bot_data.json"
-NUMBERS_DIR = "numbers"
+DATA_FILE = "bot_datas.json"
+NUMBERS_DIR = "numberssss"
 os.makedirs(NUMBERS_DIR, exist_ok=True)
 
 # New Panel OTP API Config
